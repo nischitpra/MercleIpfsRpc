@@ -58,21 +58,22 @@ const publish = async ({ keyName, dataBuffer }) => {
 
   // try publish. if key doesn't exist, create a new key and publish
   try {
-    return await _publish({ keyName, ipfsCid });
+    return await publishIpfsCid({ keyName, ipfsCid });
   } catch (e) {
     if (e instanceof ErrorIpfsRpc) {
       if (!e.data?.Message?.includes("no key")) {
         throw e;
       }
       await createKey({ keyName });
-      return await _publish({ keyName, ipfsCid });
+      return await publishIpfsCid({ keyName, ipfsCid });
     }
 
     throw e;
   }
 };
 
-const _publish = async ({ keyName, ipfsCid }) => {
+// this will not create any new ipns key
+const publishIpfsCid = async ({ keyName, ipfsCid }) => {
   const res = await postJson(`${IPFS_API_URL}/name/publish?arg=${ipfsCid}&resolve=true&key=${keyName}`);
   return { ipfsCid, name: res.Name };
 };
@@ -90,5 +91,6 @@ module.exports = {
     resolve,
     resolveKeyName,
     publish,
+    publishIpfsCid,
   },
 };
