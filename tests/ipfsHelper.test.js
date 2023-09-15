@@ -70,9 +70,16 @@ describe("Testing IPNS", function () {
       expect(ipfsCid).eq(ipns.ipfsCid);
     };
 
+    const testRenameIpns = async (ipns) => {
+      console.log("testing resolve keyName for ipfsCid");
+      const ipfsCid = await ipfsHelper.ipns.resolveKeyName({ keyName: testKeyName });
+      expect(ipfsCid).eq(ipns.ipfsCid);
+    };
+
     const ipns = await testWithNoKey();
     await testWithExistingKey(ipns);
     await testResovleIpns(ipns);
+    await testRenameIpns(ipns);
 
     await deleteTestKey();
   });

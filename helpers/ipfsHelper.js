@@ -46,6 +46,13 @@ const resolve = async ({ ipnsCid }) => {
   return (await postJson(`${IPFS_API_URL}/name/resolve?arg=${ipnsCid}`))?.Path?.split("/ipfs/")?.[1];
 };
 
+const resolveKeyName = async ({ keyName }) => {
+  // kubo doesn't have api to find key by keyName so we need to do this hack to get the current id for keyName
+  // this takes some time to process to its better to cache this in redis
+  const ipnsCid = (await renameKey({ oldKeyName: keyName, newKeyName: keyName }))?.Id;
+  return await resolve({ ipnsCid });
+};
+
 const publish = async ({ keyName, dataBuffer }) => {
   const ipfsCid = await uploadBuffer(dataBuffer);
 
@@ -81,6 +88,7 @@ module.exports = {
     listKey,
     deleteKey,
     resolve,
+    resolveKeyName,
     publish,
   },
 };
