@@ -25,7 +25,7 @@ const getJson = async (_api) => {
     method: "GET",
     headers: headers.acceptJson,
   });
-  if (!response.ok) throw new ErrorIpfsRpc(`Failed::getJson::${_api}`, response.status, await response.json());
+  if (!response.ok) throw new ErrorIpfsRpc(`Failed::getJson::${_api}`, response.status, await response.text());
   return await response.json();
 };
 
@@ -35,7 +35,7 @@ const postJson = async (_api, _body) => {
     headers: headers.postJson,
     body: JSON.stringify(_body),
   });
-  if (!response.ok) throw new ErrorIpfsRpc(`Failed::postJson::${_api}`, response.status, await response.json());
+  if (!response.ok) throw new ErrorIpfsRpc(`Failed::postJson::${_api}`, response.status, await response.text());
   return await response.json();
 };
 
@@ -44,7 +44,7 @@ const getBuffer = async (_api) => {
     method: "GET",
     headers: headers.accept,
   });
-  if (!response.ok) throw new ErrorIpfsRpc(`Failed::getBuffer::${_api}`, response.status, await response.json());
+  if (!response.ok) throw new ErrorIpfsRpc(`Failed::getBuffer::${_api}`, response.status, await response.text());
   return Buffer.from(await response.arrayBuffer());
 };
 
@@ -54,7 +54,7 @@ const postFormData = async (_api, _body) => {
     headers: headers.postFormData,
     body: _body,
   });
-  if (!response.ok) throw new ErrorIpfsRpc(`Failed::postFormData::${_api}`, response.status, await response.json());
+  if (!response.ok) throw new ErrorIpfsRpc(`Failed::postFormData::${_api}`, response.status, await response.text());
   return await response.json();
 };
 

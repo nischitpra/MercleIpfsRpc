@@ -65,7 +65,7 @@ const publish = async ({ keyName, dataBuffer }) => {
     return await publishIpfsCid({ keyName, ipfsCid });
   } catch (e) {
     if (e instanceof ErrorIpfsRpc) {
-      if (!e.data?.Message?.includes("no key")) {
+      if (!e.data?.includes("no key")) {
         throw e;
       }
       await createKey({ keyName });
