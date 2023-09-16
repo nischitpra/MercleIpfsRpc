@@ -19,6 +19,10 @@ const uploadBuffer = async (fileBuffer) => {
   return (await postFormData(`${IPFS_API_URL}/add?cid-version=1`, form))?.Name;
 };
 
+const pinIpfs = async (ipfsCid) => {
+  return await postJson(`${IPFS_API_URL}/pin/add?arg=${ipfsCid}`);
+};
+
 const importKey = async ({ keyName, key }) => {
   const bytes = utils.decodeBase64ToBytes(key);
   const form = new FormData();
@@ -82,6 +86,7 @@ module.exports = {
   ipfs: {
     getDataJson,
     uploadBuffer,
+    pin: pinIpfs,
   },
   ipns: {
     importKey,
