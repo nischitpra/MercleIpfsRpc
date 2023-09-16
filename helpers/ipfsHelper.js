@@ -1,6 +1,5 @@
 const FormData = require("form-data");
 const { postFormData, getJson, postJson } = require("./network");
-const { ErrorIpfsRpc } = require("../errors/errors");
 const utils = require("./utils");
 const { GATEWAY_URL, IPFS_API_URL } = require("../constants");
 
@@ -64,21 +63,17 @@ const publish = async ({ keyName, dataBuffer }) => {
   try {
     return await publishIpfsCid({ keyName, ipfsCid });
   } catch (e) {
-    if (e instanceof ErrorIpfsRpc) {
-      if (!e.data?.includes("no key")) {
-        throw e;
-      }
+    if (e.message?.includes("no key")) {
       await createKey({ keyName });
       return await publishIpfsCid({ keyName, ipfsCid });
     }
-
     throw e;
   }
 };
 
 // this will not create any new ipns key
 const publishIpfsCid = async ({ keyName, ipfsCid }) => {
-  const res = await postJson(`${IPFS_API_URL}/name/publish?arg=${ipfsCid}&resolve=true&key=${keyName}`);
+  const res = await postJson(`${IPFS_API_URL}/name/publish?arg=${ipfsCid}&resolve=false&key=${keyName}`);
   return { ipfsCid, name: res.Name };
 };
 
