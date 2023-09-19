@@ -56,6 +56,10 @@ const resolveKeyName = async ({ keyName }) => {
   return await resolve({ ipnsCid });
 };
 
+const getIpnsCidFromKeyName = async ({ keyName }) => {
+  return (await renameKey({ oldKeyName: keyName, newKeyName: keyName }))?.Id;
+};
+
 const publish = async ({ keyName, dataBuffer }) => {
   const ipfsCid = await uploadBuffer(dataBuffer);
 
@@ -90,6 +94,7 @@ module.exports = {
     deleteKey,
     resolve,
     resolveKeyName,
+    getIpnsCidFromKeyName,
     publish,
     publishIpfsCid,
   },
