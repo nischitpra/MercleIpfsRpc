@@ -2,7 +2,7 @@ const { CloudFrontClient, CreateInvalidationCommand } = require("@aws-sdk/client
 const { defaultProvider } = require("@aws-sdk/credential-provider-node");
 const constants = require("../constants");
 
-const cloudfront = new CloudFrontClient({ region: "us-east-1", credentials: defaultProvider() });
+const cloudfront = new CloudFrontClient({ region: constants.IPFS_CLOUDFRONT_REGION, credentials: defaultProvider() });
 
 const clearIpnsCache = async (ipnsCid) => {
   const params = {
