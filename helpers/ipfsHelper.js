@@ -2,6 +2,7 @@ const FormData = require("form-data");
 const { postFormData, getJson, postJson } = require("./network");
 const utils = require("./utils");
 const { GATEWAY_URL, IPFS_API_URL } = require("../constants");
+const awsHelper = require("./awsHelper");
 
 /**
  * IPFS RPC documentation for Kubo client
@@ -78,6 +79,7 @@ const publish = async ({ keyName, dataBuffer }) => {
 // this will not create any new ipns key
 const publishIpfsCid = async ({ keyName, ipfsCid }) => {
   const res = await postJson(`${IPFS_API_URL}/name/publish?arg=${ipfsCid}&resolve=false&key=${keyName}`);
+  await awsHelper.clearIpnsCache(res.Name);
   return { ipfsCid, name: res.Name };
 };
 

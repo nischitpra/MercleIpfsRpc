@@ -1,7 +1,9 @@
 require("dotenv").config();
+const fetch = require("node-fetch");
 const chai = require("chai");
 const expect = chai.expect;
 const ipfsHelper = require("../helpers/ipfsHelper");
+const constants = require("../constants");
 
 const testKeyName = "testKeyName";
 
@@ -32,6 +34,12 @@ describe("Testing IPNS", function () {
   this.timeout(120000); // 2mins
 
   it("test import and delete keys", async () => {
+    try {
+      // try delete if already exists
+      await deleteTestKey();
+    } catch (e) {
+      // no-op
+    }
     await importTestKey();
     expect((await ipfsHelper.ipns.listKey()).Keys.find((v) => v.Name == testKeyName)?.Name).eq(testKeyName);
     await deleteTestKey();
@@ -39,7 +47,7 @@ describe("Testing IPNS", function () {
   });
 
   it("Testing IPNS", async () => {
-    const testWithNoKey = async () => {
+    const testPublishWithNoKey = async () => {
       console.log("testing publish with non existing keyName");
       try {
         await deleteTestKey();
@@ -56,12 +64,29 @@ describe("Testing IPNS", function () {
       return r;
     };
 
-    const testWithExistingKey = async (ipns) => {
+    const testPublishWithExistingKey = async (ipns) => {
       console.log("testing publish with existing keyName");
-      const data = JSON.stringify({ name: "Test", description: "Testing ipns publish" });
+      const data = JSON.stringify({ name: "Test", description: "Testing ipns publish 1" });
       const r = await ipfsHelper.ipns.publish({ keyName: testKeyName, dataBuffer: Buffer.from(data) });
-      expect(r.ipfsCid).eq("bafkreiceblulsjb2q2dbfosxgsviun2du73jcoo3nc2hg5dsudgez4avli");
+      expect(r.ipfsCid).eq("bafkreide5oqdpysdhegzaccf6x7iaq4pjzuox2ecxipohb4e6thelunwjq");
       expect(r.name).eq(ipns.name);
+
+      return r;
+    };
+
+    const testPublishIpnsCacheClear = async (ipns) => {
+      console.log("testing cache clear after publish");
+      const oldDataFromCloudfront = await (await fetch(`${constants.GATEWAY_URL}/ipns/${ipns.name}`)).text();
+
+      const data = JSON.stringify({ name: "Test", description: "Testing ipns publish cache" });
+      const r = await ipfsHelper.ipns.publish({ keyName: testKeyName, dataBuffer: Buffer.from(data) });
+
+      const newDataFromCloudfront = await (await fetch(`${constants.GATEWAY_URL}/ipns/${ipns.name}`)).text();
+
+      expect(oldDataFromCloudfront).not.eq(newDataFromCloudfront);
+      expect(newDataFromCloudfront).eq(data);
+
+      return r;
     };
 
     const testResovleIpns = async (ipns) => {
@@ -76,8 +101,9 @@ describe("Testing IPNS", function () {
       expect(ipfsCid).eq(ipns.ipfsCid);
     };
 
-    const ipns = await testWithNoKey();
-    await testWithExistingKey(ipns);
+    let ipns = await testPublishWithNoKey();
+    ipns = await testPublishWithExistingKey(ipns);
+    ipns = await testPublishIpnsCacheClear(ipns);
     await testResovleIpns(ipns);
     await testRenameIpns(ipns);
 
