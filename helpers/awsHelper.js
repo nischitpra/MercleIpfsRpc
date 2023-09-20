@@ -1,11 +1,12 @@
 const { CloudFrontClient, CreateInvalidationCommand } = require("@aws-sdk/client-cloudfront");
 const { defaultProvider } = require("@aws-sdk/credential-provider-node");
+const constants = require("../constants");
 
 const cloudfront = new CloudFrontClient({ region: "us-east-1", credentials: defaultProvider() });
 
 const clearIpnsCache = async (ipnsCid) => {
   const params = {
-    DistributionId: process.env.AWS_CLOUDFRONT_IPFS_DISTRIBUTION_ID,
+    DistributionId: constants.IPFS_CLOUDFRONT_DISTRIBUTION_ID,
     InvalidationBatch: {
       CallerReference: `${Date.now()}`,
       Paths: {
