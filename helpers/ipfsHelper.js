@@ -83,9 +83,11 @@ const publish = async ({ keyName, dataBuffer }) => {
 
 // this will not create any new ipns key
 const publishIpfsCid = async ({ keyName, ipfsCid }) => {
+  // todo: unpin old ipfs cid
   const res = await postJson(
     `${IPFS_API_URL}/name/publish?arg=${ipfsCid}&resolve=false&key=${utils.getKeyName(keyName)}`
   );
+  pinIpfs(ipfsCid).catch((e) => console.error(e));
   await awsHelper.clearIpnsCache(res.Name);
   return { ipfsCid, name: res.Name };
 };
