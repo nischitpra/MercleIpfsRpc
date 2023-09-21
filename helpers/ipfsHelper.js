@@ -87,6 +87,7 @@ const publishIpfsCid = async ({ keyName, ipfsCid }) => {
   const res = await postJson(
     `${IPFS_API_URL}/name/publish?arg=${ipfsCid}&resolve=false&key=${utils.getKeyName(keyName)}`
   );
+  // pin the content just in case
   pinIpfs(ipfsCid).catch((e) => console.error(e));
   await awsHelper.clearIpnsCache(res.Name);
   return { ipfsCid, name: res.Name };
