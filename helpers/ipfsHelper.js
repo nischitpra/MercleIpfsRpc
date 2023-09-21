@@ -33,7 +33,12 @@ const isPinned = async (ipfsCid) => {
 };
 
 const pinRemove = async (ipfsCid) => {
-  return await postJson(`${IPFS_API_URL}/pin/rm?arg=${ipfsCid}`);
+  try {
+    return await postJson(`${IPFS_API_URL}/pin/rm?arg=${ipfsCid}`);
+  } catch (e) {
+    if (e.message.includes("not pinned")) return { Pins: [ipfsCid] };
+    throw e;
+  }
 };
 
 const importKey = async ({ keyName, key }) => {
