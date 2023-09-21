@@ -4,6 +4,7 @@ const chai = require("chai");
 const expect = chai.expect;
 const ipfsHelper = require("../helpers/ipfsHelper");
 const constants = require("../constants");
+const utils = require("../helpers/utils");
 
 const testKeyName = "testKeyName";
 
@@ -41,9 +42,13 @@ describe("Testing IPNS", function () {
       // no-op
     }
     await importTestKey();
-    expect((await ipfsHelper.ipns.listKey()).Keys.find((v) => v.Name == testKeyName)?.Name).eq(testKeyName);
+    expect((await ipfsHelper.ipns.listKey()).Keys.find((v) => v.Name == utils.getKeyName(testKeyName))?.Name).eq(
+      utils.getKeyName(testKeyName)
+    );
     await deleteTestKey();
-    expect((await ipfsHelper.ipns.listKey()).Keys.find((v) => v.Name == testKeyName)?.Name).eq(undefined);
+    expect((await ipfsHelper.ipns.listKey()).Keys.find((v) => v.Name == utils.getKeyName(testKeyName))?.Name).eq(
+      undefined
+    );
   });
 
   it("Testing IPNS", async () => {

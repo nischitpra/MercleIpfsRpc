@@ -27,19 +27,24 @@ const importKey = async ({ keyName, key }) => {
   const bytes = utils.decodeBase64ToBytes(key);
   const form = new FormData();
   form.append("file", Buffer.from(bytes, "utf-8"));
-  return await postFormData(`${IPFS_API_URL}/key/import?arg=${keyName}&allow-any-key-type=true`, form);
+  return await postFormData(
+    `${IPFS_API_URL}/key/import?arg=${utils.getKeyName(keyName)}&allow-any-key-type=true`,
+    form
+  );
 };
 
 const createKey = async ({ keyName }) => {
-  return await postJson(`${IPFS_API_URL}/key/gen?arg=${keyName}`);
+  return await postJson(`${IPFS_API_URL}/key/gen?arg=${utils.getKeyName(keyName)}`);
 };
 
 const renameKey = async ({ oldKeyName, newKeyName }) => {
-  return await postJson(`${IPFS_API_URL}/key/rename?arg=${oldKeyName}&arg=${newKeyName}`);
+  return await postJson(
+    `${IPFS_API_URL}/key/rename?arg=${utils.getKeyName(oldKeyName)}&arg=${utils.getKeyName(newKeyName)}`
+  );
 };
 
 const deleteKey = async ({ keyName }) => {
-  return await postJson(`${IPFS_API_URL}/key/rm?arg=${keyName}&l=true`);
+  return await postJson(`${IPFS_API_URL}/key/rm?arg=${utils.getKeyName(keyName)}&l=true`);
 };
 
 const listKey = async () => {
@@ -53,7 +58,7 @@ const resolve = async ({ ipnsCid }) => {
 const resolveKeyName = async ({ keyName }) => {
   // kubo doesn't have api to find key by keyName so we need to do this hack to get the current id for keyName
   // this takes some time to process to its better to cache this in redis
-  const ipnsCid = (await renameKey({ oldKeyName: keyName, newKeyName: keyName }))?.Id;
+  const ipnsCid = await getIpnsCidFromKeyName({ keyName });
   return await resolve({ ipnsCid });
 };
 
@@ -78,7 +83,9 @@ const publish = async ({ keyName, dataBuffer }) => {
 
 // this will not create any new ipns key
 const publishIpfsCid = async ({ keyName, ipfsCid }) => {
-  const res = await postJson(`${IPFS_API_URL}/name/publish?arg=${ipfsCid}&resolve=false&key=${keyName}`);
+  const res = await postJson(
+    `${IPFS_API_URL}/name/publish?arg=${ipfsCid}&resolve=false&key=${utils.getKeyName(keyName)}`
+  );
   await awsHelper.clearIpnsCache(res.Name);
   return { ipfsCid, name: res.Name };
 };
