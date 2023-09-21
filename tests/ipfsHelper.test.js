@@ -22,12 +22,21 @@ const deleteTestKey = async () => {
 describe("Testing IPFS", function () {
   this.timeout(120000); // 2mins
 
-  it("test upload json", async () => {
+  it("Testing IPFS", async () => {
+    console.log("testing ipfs upload");
     const data = JSON.stringify({ msg: "Hello World!" });
     const ipfsCid = await ipfsHelper.ipfs.uploadBuffer(Buffer.from(data));
     const json = await ipfsHelper.ipfs.getDataJson(ipfsCid);
-
     expect(JSON.stringify(json)).eq(data);
+
+    console.log("testing ipfs is pinned");
+    expect(await ipfsHelper.ipfs.isPinned(ipfsCid)).eq(true);
+
+    console.log("testing multiple pin then single remove pin");
+    await ipfsHelper.ipfs.pin(ipfsCid);
+    await ipfsHelper.ipfs.pin(ipfsCid);
+    await ipfsHelper.ipfs.pinRemove(ipfsCid);
+    expect(await ipfsHelper.ipfs.isPinned(ipfsCid)).eq(false);
   });
 });
 
@@ -75,6 +84,9 @@ describe("Testing IPNS", function () {
       const r = await ipfsHelper.ipns.publish({ keyName: testKeyName, dataBuffer: Buffer.from(data) });
       expect(r.ipfsCid).eq("bafkreide5oqdpysdhegzaccf6x7iaq4pjzuox2ecxipohb4e6thelunwjq");
       expect(r.name).eq(ipns.name);
+
+      console.log("testing old ipfsCid is unpinned after new publish");
+      expect(await ipfsHelper.ipfs.isPinned(ipns.ipfsCid)).eq(false);
 
       return r;
     };

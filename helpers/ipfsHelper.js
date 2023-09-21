@@ -23,6 +23,19 @@ const pinIpfs = async (ipfsCid) => {
   return await postJson(`${IPFS_API_URL}/pin/add?arg=${ipfsCid}`);
 };
 
+const isPinned = async (ipfsCid) => {
+  try {
+    return (await postJson(`${IPFS_API_URL}/pin/ls?arg=${ipfsCid}`)).Keys[ipfsCid] !== undefined;
+  } catch (e) {
+    if (e.message.includes("is not pinned")) return false;
+    throw e;
+  }
+};
+
+const pinRemove = async (ipfsCid) => {
+  return await postJson(`${IPFS_API_URL}/pin/rm?arg=${ipfsCid}`);
+};
+
 const importKey = async ({ keyName, key }) => {
   const bytes = utils.decodeBase64ToBytes(key);
   const form = new FormData();
@@ -83,12 +96,22 @@ const publish = async ({ keyName, dataBuffer }) => {
 
 // this will not create any new ipns key
 const publishIpfsCid = async ({ keyName, ipfsCid }) => {
-  // todo: unpin old ipfs cid
+  let oldIpfsCid;
+  try {
+    oldIpfsCid = await resolveKeyName({ keyName });
+  } catch (e) {
+    // no-op. probably doesn't exist
+  }
+
   const res = await postJson(
     `${IPFS_API_URL}/name/publish?arg=${ipfsCid}&resolve=false&key=${utils.getKeyName(keyName)}`
   );
-  // pin the content just in case
+
+  // pin the content just in case its not uploaded from our node
   pinIpfs(ipfsCid).catch((e) => console.error(e));
+  if (oldIpfsCid) {
+    pinRemove(oldIpfsCid).catch((e) => console.error(e));
+  }
   await awsHelper.clearIpnsCache(res.Name);
   return { ipfsCid, name: res.Name };
 };
@@ -98,6 +121,8 @@ module.exports = {
     getDataJson,
     uploadBuffer,
     pin: pinIpfs,
+    isPinned,
+    pinRemove,
   },
   ipns: {
     importKey,
