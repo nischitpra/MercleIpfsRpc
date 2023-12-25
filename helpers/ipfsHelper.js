@@ -109,7 +109,7 @@ const publishIpfsCid = async ({ keyName, ipfsCid }) => {
   }
 
   const res = await postJson(
-    `${IPFS_API_URL}/name/publish?arg=${ipfsCid}&resolve=false&key=${utils.getKeyName(keyName)}&allow-offline=true`
+    `${IPFS_API_URL}/name/publish?arg=${ipfsCid}&resolve=false&key=${utils.getKeyName(keyName)}&allow-offline=true&lifetime=876000h`
   );
 
   // pin the content just in case its not uploaded from our node
