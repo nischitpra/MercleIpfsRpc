@@ -84,6 +84,14 @@ const getIpnsCidFromKeyName = async ({ keyName }) => {
   return (await renameKey({ oldKeyName: keyName, newKeyName: keyName }))?.Id;
 };
 
+const getOrCreateIpnsCidFromKeyName = async ({ keyName }) => {
+  try {
+    return await getIpnsCidFromKeyName({ keyName });
+  } catch (e) {
+    return (await createKey({ keyName }))?.Id;
+  }
+};
+
 const publish = async ({ keyName, dataBuffer }) => {
   const ipfsCid = await uploadBuffer(dataBuffer);
 
@@ -109,7 +117,9 @@ const publishIpfsCid = async ({ keyName, ipfsCid }) => {
   }
 
   const res = await postJson(
-    `${IPFS_API_URL}/name/publish?arg=${ipfsCid}&resolve=false&key=${utils.getKeyName(keyName)}&allow-offline=true&lifetime=876000h`
+    `${IPFS_API_URL}/name/publish?arg=${ipfsCid}&resolve=false&key=${utils.getKeyName(
+      keyName
+    )}&allow-offline=true&lifetime=876000h`
   );
 
   // pin the content just in case its not uploaded from our node
@@ -137,6 +147,7 @@ module.exports = {
     resolve,
     resolveKeyName,
     getIpnsCidFromKeyName,
+    getOrCreateIpnsCidFromKeyName,
     publish,
     publishIpfsCid,
   },
