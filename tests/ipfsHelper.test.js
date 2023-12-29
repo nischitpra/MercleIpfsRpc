@@ -126,4 +126,28 @@ describe("Testing IPNS", function () {
 
     await deleteTestKey();
   });
+
+  it("Testing IPNS getOrCreateIpnsCidFromKeyName", async () => {
+    const keyName = "testingKeyName121";
+
+    // try delete the key if it already exists
+    try {
+      await ipfsHelper.ipns.deleteKey({ keyName });
+    } catch (e) {
+      // no-op
+    }
+
+    const newIpnsCid = await ipfsHelper.ipns.getOrCreateIpnsCidFromKeyName({ keyName });
+    const ipnsCid = await ipfsHelper.ipns.getIpnsCidFromKeyName({ keyName });
+
+    expect(newIpnsCid).eq(ipnsCid);
+
+    const shouldExistsIpnsCid = await ipfsHelper.ipns.getOrCreateIpnsCidFromKeyName({ keyName });
+    expect(shouldExistsIpnsCid).eq(newIpnsCid);
+
+    console.log(ipnsCid);
+    console.log(newIpnsCid);
+    console.log(shouldExistsIpnsCid);
+    console.log(ipnsCid);
+  });
 });
