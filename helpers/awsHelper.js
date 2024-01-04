@@ -7,6 +7,8 @@ const cloudfront = new CloudFrontClient({
 });
 
 const clearIpnsCache = async (ipnsCid) => {
+  // todo: don't invalidate anything
+  return;
   try {
     const params = {
       DistributionId: constants.IPFS_CLOUDFRONT_DISTRIBUTION_ID,
